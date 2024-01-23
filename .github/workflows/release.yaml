@@ -34,21 +34,12 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Setup env variables
+        run: |
+          echo "DOCKER_TAG=${DOCKER_TAG}"
+          echo "APP_ID=${APP_ID}"
         env:
           DOCKER_TAG: ${{ inputs.tagName }}
-          baseImage: ${{ inputs.baseImage }}
-          shortVersionTag: ${{ inputs.short_version_tag }}
-
-      - name: Check env variables
-        run: |
-          echo "DOCKER_TAG=${{ env.DOCKER_TAG }}"
-          echo "APP_ID=${{ env.appID }}"
-
-      - name: Check docker file
-        run: |
-          cat Dockerfile
-          pwd
-          ls -la
+          APP_ID: ${{ inputs.appID }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -66,7 +57,6 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max'
           build-args: |
             APP_ID=${{ env.appID }}
-          context: "/home/runner/work/python-docker-builder/python-docker-builder"
           file: bullseye/Dockerfile.app
 
       - name: Print image digest
