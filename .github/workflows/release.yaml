@@ -52,11 +52,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: "dingdayu/steamcmd:${{ env.DOCKER_TAG }}"
+          tags: "dingdayu/steamcmd:${{ inputs.tagName }}"
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max'
           build-args: |
-            APP_ID=${{ env.appID }}
+            APP_ID=${{ inputs.appID }}
           file: bullseye/Dockerfile.app
 
       - name: Print image digest
