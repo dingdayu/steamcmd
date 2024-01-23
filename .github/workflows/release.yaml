@@ -1,4 +1,4 @@
-name: Release new version
+name: Build new version
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ on:
         type: string
         required: true
 
-run-name: Build Python ${{ inputs.pythonVersion }} on ${{ inputs.baseImage }}
+run-name: Build ${{ inputs.tagName }} ( ${{ inputs.appID }} )
 
 jobs:
   build:
@@ -52,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: "dingdayu/steamcmd:${{ env.DOCKER_SHORT_TAG }}"
+          tags: "dingdayu/steamcmd:${{ env.DOCKER_TAG }}"
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max'
           build-args: |
