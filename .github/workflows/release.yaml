@@ -1,0 +1,73 @@
+name: Release new version
+
+on:
+  workflow_dispatch:
+    inputs:
+      tagName:
+        description: "Docker image tag name."
+        required: true
+        type: string
+      appID:
+        description: "Steam app ID."
+        type: string
+        required: true
+
+run-name: Build Python ${{ inputs.pythonVersion }} on ${{ inputs.baseImage }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Setup env variables
+        env:
+          DOCKER_TAG: ${{ inputs.tagName }}
+          baseImage: ${{ inputs.baseImage }}
+          shortVersionTag: ${{ inputs.short_version_tag }}
+
+      - name: Check env variables
+        run: |
+          echo "DOCKER_TAG=${{ env.DOCKER_TAG }}"
+          echo "APP_ID=${{ env.appID }}"
+
+      - name: Check docker file
+        run: |
+          cat Dockerfile
+          pwd
+          ls -la
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: "dingdayu/steamcmd:${{ env.DOCKER_SHORT_TAG }}"
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max'
+          build-args: |
+            APP_ID=${{ env.appID }}
+          context: "/home/runner/work/python-docker-builder/python-docker-builder"
+          file: bullseye/Dockerfile.app
+
+      - name: Print image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
