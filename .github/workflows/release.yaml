@@ -11,6 +11,11 @@ on:
         description: "Steam app ID."
         type: string
         required: true
+      dockerfile:
+        description: "Dockerfile name."
+        type: string
+        required: false
+        default: "Dockerfile"
 
 run-name: Build ${{ inputs.tagName }} ( ${{ inputs.appID }} )
 
@@ -57,7 +62,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max'
           build-args: |
             APP_ID=${{ inputs.appID }}
-          file: bullseye/Dockerfile.app
+          file: "bullseye/${{ inputs.dockerfile }}"
 
       - name: Print image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
