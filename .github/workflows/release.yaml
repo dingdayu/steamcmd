@@ -10,7 +10,7 @@ on:
       appID:
         description: "Steam app ID."
         type: string
-        required: true
+        required: false
       dockerfile:
         description: "Dockerfile name."
         type: string
